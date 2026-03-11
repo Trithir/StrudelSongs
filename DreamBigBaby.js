@@ -71,12 +71,12 @@ const melodySolo = stack(
   note(`<
    [g5 ~ e5 ~ g5 ~ ~ ~]
    [~ a5 ~ g5 ~ e5 ~ ~]
-   [~ g5 ~ a5 ~ c6 ~ ~]
+   [g5 ~ a5 ~ c6 ~ ~ ~]
    [~ g5 ~ e5 ~ ~ ~ ~]
 
    [g5 ~ e5 ~ g5 ~ ~ ~]
    [~ a5 ~ g5 ~ e5 ~ ~]
-   [~ g5 ~ a5 ~ c6 ~ ~]
+   [g5 ~ a5 ~ c6 ~ ~ ~]
    [~ g5 ~ e5@2 ~ ~ ~]
   >`),
   chooseCycles(
