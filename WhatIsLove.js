@@ -20,44 +20,104 @@ const as = register('as', (mapping, pat) => {
 });
 
 // Track levels: set to 0 to mute, or use smaller values to tuck things back.
+let KICK = 1
+let HATS = 1
+let DEDO = 1
+let BASS = 1
+let ORGAN = 1
 let VOCAL1 = 0
 let VOCAL2 = 0
 let VOCAL3 = 0
-let LEAD = 0
 let AIR = 0
-let BASS = 1
 let SUB = 0
-let KICK = 1
 let CLAP = 0
-let HATS = 0
 let RIDE = 0
 let PAD = 0
 
 stack(
 
-  // Main oregon
-  // Back to a more placeholder lead shape so the screenshot phrase can live in the bass instead.
-  "<0@16 1@16 2@16 1@16>".pickRestart([
-    "[[7 7] ~ [10 10] ~ [5 5] ~ [10 10] ~]/2",
-    "[[7 7] ~ [10 10] ~ [12 12] ~ [10 10] ~]/2",
-    "[[7 7] ~ [10 10] ~ [5 5] ~ [3 3] ~]/2"
-  ])
-    .scale("f3:minor")
-    .note()
-    .s("z_sawtooth")
-    .clip(0.82)
-    .adsr("0.01:0.12:0.45:0.08")
-    .delay(0.22)
-    .dfb(0.25)
+  // de do, de do
+  note(`
+  <
+    [ as4 ~ a4 ~ as4 ~ g4 ~ as4 ~ a4 ~ as4 ~ g4 ~ ]
+    [ as4 ~ a4 ~ as4 ~ f4 ~ as4 ~ a4 ~ as4 ~ f4 ~ ]
+    [ a4 ~ g4 ~ a4 ~ f4 ~ a4 ~ g4 ~ a4 ~ f4 ~ ]
+    [ a4 ~ g4 ~ a4 ~ f4 ~ a4 ~ g4 ~ a4 ~ f4 ~ ]
+  >
+  `)
+    .s("gm_pad_warm")
+    .gain(.7 * DEDO),
+
+  // Main organ
+  // Full organ rhythm.
+  // Removed the leading silence that was shifting the whole bar late.
+  // Same stab pattern, same total bar length.
+  // Progression:
+  // 1: Gm      = g4 bb4 d5
+  // 2: Bb/D    = d4 f4 bb4
+  // 3: Dm/F    = f4 a4 d5
+  // 4: F/A     = a4 c5 f5
+  note(`
+  <
+    [[g4,bb4,d5] _ ~ ~ [g4,bb4,d5] _ ~ ~ [g4,bb4,d5] _ ~ [g4,bb4,d5] _ ~ [g4,bb4,ds5] _ ]
+    [[f4,bb4,d5] _ ~ ~ [f4,bb4,d5] _ ~ ~ [f4,bb4,d5] _ ~ [f4,bb4,d5] _ ~ [f4,bb4,ds5] _ ]
+    [[f4,a4,d5] _ ~ ~ [f4,a4,d5] _ ~ ~ [f4,a4,d5] _ ~ [f4,a4,d5] _ ~ [f4,a4,ds5] _ ]
+    [[a4,c5,f5] _ ~ ~ [a4,c5,f5] _ ~ ~ [a4,c5,f5] _ ~ [a4,c5,f5] _ ~ [a4,c5,f5] _ ]
+  >
+  `)
+    .s("gm_rock_organ")
+    .hpf(180)
+    .lpf(6500)
+    .lpq(3)
+    .clip(0.9)
+    .adsr("0.005:0.18:0.70:0.10")
+    .delay(0.14)
+    .dfb(0.32)
     .room(0.15)
-    .gain(0.95 * LEAD),
+    .gain(.99 * ORGAN)
+    .off(1/64, x => x.gain(0.45 * ORGAN).hpf(400).room(0.35)),
+
+  // Bassline
+  // Broken into 16th-note bars like the organ so it's easier to edit.
+  // This is the current riff, just reorganized into 4 bars.
+  // Bar notes are direct note names, so no scale mapping needed here.
+  note(`
+  <
+    [~ ~ g2 _ ~ ~ g2 _ ~ ~ g2 ~ ~ g2 ~ g2]
+    [~ ~ as2 _ ~ ~ as2 _ ~ ~ as2 ~ ~ as2 ~ as2]
+    [~ ~ d3 _ ~ ~ d3 _ ~ ~ d3 ~ ~ d3 ~ d3]
+    [~ ~ f3 _ ~ ~ f3 _ ~ ~ f3 ~ ~ f3 ~ f3]
+  >
+  `)
+    .s("gm_rock_organ")
+    .lpf(1500)
+    .lpq(4)
+    .clip(0.95)
+    .adsr("0.005:0.06:0.55:0.03")
+    .gain(1.1 * BASS),
+
+  
+  // Closed hats on the & of each beat, plus tambourine on 8ths with 16th accents
+  stack(
+    // HH on the offbeats: 1& 2& 3& 4&
+    s("[~ hh ~ hh ~ hh ~ hh]")
+      .bank("RolandTR909")
+      .gain("0 0.14 0 0.16 0 0.14 0 0.18")
+      .gain(0.6 * HATS),
+
+    s("[tambourine ~ tambourine ~ tambourine ~ tambourine tambourine tambourine ~ tambourine ~ tambourine ~ tambourine tambourine]")
+      .hpf(3500)
+      .hpq(5)
+      .shape(0.15)
+      .gain(1.2 * HATS)
+  ).pan(0.58),
 
  // Vocal1
   // Important: plain spaces/newlines are still one sequence in one cycle.
   // Wrapping the bars in < ... > makes them concatenate one bar per cycle.
   note(`
   <
-    [~ ~ ~ ~ d4 f5 g5@2]
+    [~@2 ~@2 ~@2 ~@2 d4 ~ f5 ~ g5@2]
     [~ ~ d4 e4 d4 f5@2]
     [d4@2 ~ ~ ~ d4 f5@2]
     [d4@2 ~ ~ ~ d4 c4@2]
@@ -85,17 +145,6 @@ stack(
     .hpf(700)
     .gain(0.45 * AIR),
 
-  // Bassline
-  // Screenshot phrase moved here.
-  // Start here for note tinkering if this is the recognizable riff you want.
-  "[g1 ~@2 g1 ~ g1 ~@2 g1 ~@2  f1 ~@2 f1 ~ f1 ~@2 c2 ~  d2 ~@2 d2 ~ d2 ~@2 d2 ~ d2 ~@2  c2 ~@2 c2 ~ c2 ~@2 d2 ~ c2 ~@2]/4"
-    .scale("f2:minor")
-    .note()
-    .s("z_sawtooth")
-    .lpf(240)
-    .adsr("0.01:0.08:0.75:0.08")
-    .gain(0.92 * BASS),
-
   // Sub weight under the bass
   // Tiny changes matter. Too much and everything turns into soup.
   "<0@32>".pickRestart([
@@ -110,18 +159,12 @@ stack(
   s("bd*4")
     .bank("RolandTR909")
     .lpf(170)
-    .gain(.7 * KICK),
+    .gain(.5 * KICK),
 
   // Clap / snare on 2 and 4
   s("[~ cp ~ cp]")
     .bank("RolandTR909")
     .gain(0.58 * CLAP),
-
-  // Closed hats driving the dance pulse
-  stack(
-    s("hh*8").bank("RolandTR909").gain("0.10 0.14 0.10 0.16 0.10 0.14 0.10 0.18").gain(HATS),
-    s("oh*4").bank("RolandTR909").gain("0 0.14 0 0.18").gain(HATS).release(0)
-  ).pan(0.58),
 
   // Little ride / top-end sparkle for motion
   s("[~ ~ rd ~]*2")
